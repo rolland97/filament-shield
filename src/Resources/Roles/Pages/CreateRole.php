@@ -25,8 +25,12 @@ class CreateRole extends CreateRecord
             ->unique();
 
         if (Utils::isTenancyEnabled() && Arr::has($data, Utils::getTenantModelForeignKey()) && filled($data[Utils::getTenantModelForeignKey()])) {
+            $data['name'] = Utils::prefixRoleName((string) $data['name']);
+
             return Arr::only($data, ['name', 'guard_name', Utils::getTenantModelForeignKey()]);
         }
+
+        $data['name'] = Utils::prefixRoleName((string) $data['name']);
 
         return Arr::only($data, ['name', 'guard_name']);
     }

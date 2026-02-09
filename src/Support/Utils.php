@@ -65,7 +65,7 @@ class Utils
 
     public static function getSuperAdminName(): string
     {
-        return (string) static::getConfig()->super_admin->name;
+        return static::prefixRoleName((string) static::getConfig()->super_admin->name);
     }
 
     public static function isSuperAdminDefinedViaGate(): bool
@@ -85,7 +85,7 @@ class Utils
 
     public static function getPanelUserRoleName(): string
     {
-        return (string) static::getConfig()->panel_user->name;
+        return static::prefixRoleName((string) static::getConfig()->panel_user->name);
     }
 
     public static function createPanelUserRole(): void
@@ -256,11 +256,12 @@ class Utils
     public static function createRole(?string $name = null, int | string | null $tenantId = null): Role
     {
         $guardName = static::getFilamentAuthGuard();
+        $roleName = static::prefixRoleName($name ?? (string) static::getConfig()->super_admin->name);
 
         if (static::isTenancyEnabled()) {
             return static::getRoleModel()::firstOrCreate(
                 [
-                    'name' => $name ?? static::getConfig()->super_admin->name,
+                    'name' => $roleName,
                     static::getTenantModelForeignKey() => $tenantId,
                     'guard_name' => $guardName,
                 ],
@@ -269,7 +270,7 @@ class Utils
 
         return static::getRoleModel()::firstOrCreate(
             [
-                'name' => $name ?? static::getSuperAdminName(),
+                'name' => $roleName,
                 'guard_name' => $guardName,
             ],
         );
@@ -285,6 +286,63 @@ class Utils
     public static function isPanelPrefixEnabled(): bool
     {
         return (bool) (static::getConfig()->permissions->panel_prefix ?? false);
+    }
+
+    public static function isRolePanelPrefixEnabled(): bool
+    {
+        return (bool) (static::getConfig()->roles->panel_prefix ?? false);
+    }
+
+    public static function getRolePrefixSeparator(): string
+    {
+        return (string) (static::getConfig()->roles->panel_prefix_separator
+            ?? static::getConfig()->permissions->panel_prefix_separator
+            ?? ':');
+    }
+
+    public static function getPanelRolePrefix(): ?string
+    {
+        if (! static::isRolePanelPrefixEnabled()) {
+            return null;
+        }
+
+        $panel = Filament::getCurrentOrDefaultPanel();
+        if (! $panel || $panel->isDefault()) {
+            return null;
+        }
+
+        $panelId = $panel->getId();
+        if (blank($panelId)) {
+            return null;
+        }
+
+        return $panelId . static::getRolePrefixSeparator();
+    }
+
+    public static function prefixRoleName(string $name): string
+    {
+        $prefix = static::getPanelRolePrefix();
+        if (blank($prefix)) {
+            return $name;
+        }
+
+        if (str_starts_with($name, $prefix)) {
+            return $name;
+        }
+
+        return $prefix . $name;
+    }
+
+    public static function stripPanelRolePrefix(string $name): string
+    {
+        $prefix = static::getPanelRolePrefix();
+        if (blank($prefix)) {
+            return $name;
+        }
+
+        return str_starts_with($name, $prefix)
+            ? substr($name, strlen($prefix))
+            : $name;
     }
 
     public static function getPanelPermissionPrefix(): ?string

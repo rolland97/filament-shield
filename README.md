@@ -197,6 +197,17 @@ If your app uses multiple panels that share the same auth guard, enable `permiss
 Example (panel ID `admin`):
 - `View:User` becomes `admin:View:User`
 
+## Roles
+You can optionally prefix role names by panel ID to isolate roles across multiple panels. The default panel remains unprefixed.
+
+### Configuration
+```php
+'roles' => [
+    'panel_prefix' => false,
+    'panel_prefix_separator' => ':',
+],
+```
+
 * Now let's consider an example where we want to handle `Resource` entities that handle the same `Model` or `Models` with the same name but with different namespaces and directory structures. The Filament [Demo](https://github.com/filamentphp/demo) has two resources with the same name that handle two different models:
   - `App\Filament\Resources\Blog\Categories\CategoryResource` that handles `App\Models\Blog\Category`
   - `App\Filament\Resources\Shop\Categories\CategoryResource` that handles `App\Models\Shop\Category`

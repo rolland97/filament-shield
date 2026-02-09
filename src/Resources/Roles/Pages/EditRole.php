@@ -33,6 +33,8 @@ class EditRole extends EditRecord
             ->flatten()
             ->unique();
 
+        $data['name'] = Utils::prefixRoleName((string) $data['name']);
+
         if (Utils::isTenancyEnabled() && Arr::has($data, Utils::getTenantModelForeignKey()) && filled($data[Utils::getTenantModelForeignKey()])) {
             return Arr::only($data, ['name', 'guard_name', Utils::getTenantModelForeignKey()]);
         }

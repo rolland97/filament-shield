@@ -89,6 +89,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Roles
+    |--------------------------------------------------------------------------
+    |
+    | Optionally prefix role names by panel ID to isolate roles across
+    | multiple panels. The default panel remains unprefixed.
+    |
+    */
+
+    'roles' => [
+        'panel_prefix' => false,
+        'panel_prefix_separator' => ':',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Permission Builder
     |--------------------------------------------------------------------------
     |
