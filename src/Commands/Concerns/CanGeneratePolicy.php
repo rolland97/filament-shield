@@ -44,9 +44,12 @@ trait CanGeneratePolicy
                 ->toString();
         }
 
+        $policyPathSegment = Utils::getPolicyPathRelativeToApp() ?? 'Policies';
+        $policyPathSegment = str_replace(['\\', '/'], DIRECTORY_SEPARATOR, $policyPathSegment);
+
         /** @phpstan-ignore-next-line */
         return Str::of($path)
-            ->replace('Models', Str::of(Utils::resolveNamespaceFromPath(Utils::getPolicyPath()))->afterLast('\\')->toString())
+            ->replace('Models', $policyPathSegment)
             ->replaceLast('.php', 'Policy.php')
             ->replace('\\', DIRECTORY_SEPARATOR)
             ->toString();
@@ -73,7 +76,7 @@ trait CanGeneratePolicy
         $namespace = $reflectionClass->getNamespaceName();
         $path = $reflectionClass->getFileName();
 
-        $policyNamespace = Str::of(Utils::resolveNamespaceFromPath(Utils::getPolicyPath()))->afterLast('\\')->toString();
+        $policyNamespace = Utils::getPolicyNamespaceSegment();
 
         $stubVariables['namespace'] = Str::of($path)->contains(['vendor', 'src'])
             ? Utils::resolveNamespaceFromPath(Utils::getPolicyPath())

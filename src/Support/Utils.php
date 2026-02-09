@@ -140,6 +140,38 @@ class Utils
         return $path;
     }
 
+    public static function getPolicyPathRelativeToApp(): ?string
+    {
+        $policyPath = Str::of(static::getPolicyPath())
+            ->replace('\\', DIRECTORY_SEPARATOR)
+            ->toString();
+
+        $appPath = Str::of(app_path())
+            ->replace('\\', DIRECTORY_SEPARATOR)
+            ->rtrim(DIRECTORY_SEPARATOR)
+            ->toString();
+
+        $prefix = $appPath . DIRECTORY_SEPARATOR;
+
+        if (str_starts_with($policyPath, $prefix)) {
+            return Str::of($policyPath)->after($prefix)->toString();
+        }
+
+        return null;
+    }
+
+    public static function getPolicyNamespaceSegment(): string
+    {
+        $relative = static::getPolicyPathRelativeToApp();
+        if (filled($relative)) {
+            return str_replace(DIRECTORY_SEPARATOR, '\\', $relative);
+        }
+
+        return Str::of(static::resolveNamespaceFromPath(static::getPolicyPath()))
+            ->afterLast('\\')
+            ->toString();
+    }
+
     public static function getRolePolicyPath(): ?string
     {
         $filesystem = new Filesystem;
