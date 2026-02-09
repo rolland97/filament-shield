@@ -10,6 +10,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class EditRole extends EditRecord
 {
@@ -48,6 +49,21 @@ class EditRole extends EditRecord
                 'guard_name' => $this->data['guard_name'],
             ]));
         });
+
+        $panelPrefix = Utils::getPanelPermissionPrefix();
+        if (filled($panelPrefix)) {
+            $otherPanelPermissions = $this->record->permissions
+                ->pluck('name')
+                ->filter(fn (string $name): bool => ! Str::startsWith($name, $panelPrefix))
+                ->values();
+
+            $permissionNames = $permissionModels->pluck('name')
+                ->merge($otherPanelPermissions)
+                ->unique()
+                ->values();
+
+            $permissionModels = Utils::getPermissionModel()::whereIn('name', $permissionNames)->get();
+        }
 
         // @phpstan-ignore-next-line
         $this->record->syncPermissions($permissionModels);
