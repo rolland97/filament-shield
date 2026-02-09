@@ -56,6 +56,9 @@ class RoleResource extends Resource
                                             $component->state(Utils::stripPanelRolePrefix($state));
                                         }
                                     })
+                                    ->mutateStateForValidationUsing(fn (?string $state): ?string => filled($state)
+                                        ? Utils::prefixRoleName($state)
+                                        : $state)
                                     ->unique(
                                         ignoreRecord: true, /** @phpstan-ignore-next-line */
                                         modifyRuleUsing: fn (Unique $rule): Unique => Utils::isTenancyEnabled() ? $rule->where(Utils::getTenantModelForeignKey(), Filament::getTenant()?->id) : $rule
