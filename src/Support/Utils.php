@@ -287,6 +287,20 @@ class Utils
         return (bool) (static::getConfig()->permissions->panel_prefix ?? false);
     }
 
+    public static function getPanelPermissionPrefix(): ?string
+    {
+        if (! static::isPanelPrefixEnabled()) {
+            return null;
+        }
+
+        $panelId = static::getCurrentPanelId();
+        if (blank($panelId)) {
+            return null;
+        }
+
+        return $panelId . static::getPanelPrefixSeparator();
+    }
+
     public static function getPanelPrefixSeparator(): string
     {
         return (string) (static::getConfig()->permissions->panel_prefix_separator

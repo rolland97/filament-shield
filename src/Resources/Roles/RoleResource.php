@@ -108,7 +108,16 @@ class RoleResource extends Resource
                 TextColumn::make('permissions_count')
                     ->badge()
                     ->label(__('filament-shield::filament-shield.column.permissions'))
-                    ->counts('permissions')
+                    ->state(function ($record): int {
+                        $panelPrefix = Utils::getPanelPermissionPrefix();
+                        if (blank($panelPrefix)) {
+                            return $record->permissions()->count();
+                        }
+
+                        return $record->permissions()
+                            ->where('name', 'like', $panelPrefix . '%')
+                            ->count();
+                    })
                     ->color('primary'),
                 TextColumn::make('updated_at')
                     ->label(__('filament-shield::filament-shield.column.updated_at'))
