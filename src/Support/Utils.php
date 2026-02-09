@@ -153,13 +153,23 @@ class Utils
         return (bool) (static::getConfig()->policies->panel_path ?? false);
     }
 
+    public static function isPolicyPathForced(): bool
+    {
+        return (bool) (static::getConfig()->policies->force_path ?? false);
+    }
+
     public static function getPolicyPanelSegment(): ?string
     {
         if (! static::isPanelPolicyPathEnabled()) {
             return null;
         }
 
-        $panelId = static::getCurrentPanelId();
+        $panel = Filament::getCurrentOrDefaultPanel();
+        if (! $panel || $panel->isDefault()) {
+            return null;
+        }
+
+        $panelId = $panel->getId();
         if (blank($panelId)) {
             return null;
         }
