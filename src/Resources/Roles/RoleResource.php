@@ -26,6 +26,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Unique;
 
@@ -50,6 +51,11 @@ class RoleResource extends Resource
                             ->schema([
                                 TextInput::make('name')
                                     ->label(__('filament-shield::filament-shield.field.name'))
+                                    ->afterStateHydrated(function (TextInput $component, ?string $state): void {
+                                        if (filled($state)) {
+                                            $component->state(Utils::stripPanelRolePrefix($state));
+                                        }
+                                    })
                                     ->unique(
                                         ignoreRecord: true, /** @phpstan-ignore-next-line */
                                         modifyRuleUsing: fn (Unique $rule): Unique => Utils::isTenancyEnabled() ? $rule->where(Utils::getTenantModelForeignKey(), Filament::getTenant()?->id) : $rule
@@ -92,8 +98,22 @@ class RoleResource extends Resource
                 TextColumn::make('name')
                     ->weight(FontWeight::Medium)
                     ->label(__('filament-shield::filament-shield.column.name'))
-                    ->formatStateUsing(fn (string $state): string => Str::headline($state))
-                    ->searchable(),
+                    ->formatStateUsing(fn (string $state): string => Str::headline(Utils::stripPanelRolePrefix($state)))
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        $prefix = Utils::getPanelRolePrefix();
+                        if (filled($prefix)) {
+                            return $query->where('name', 'like', $prefix . '%' . $search . '%');
+                        }
+
+                        if (Utils::isRolePanelPrefixEnabled()) {
+                            $separator = Utils::getRolePrefixSeparator();
+
+                            return $query->where('name', 'not like', '%' . $separator . '%')
+                                ->where('name', 'like', '%' . $search . '%');
+                        }
+
+                        return $query->where('name', 'like', '%' . $search . '%');
+                    }),
                 TextColumn::make('guard_name')
                     ->badge()
                     ->color('warning')
@@ -133,6 +153,24 @@ class RoleResource extends Resource
             ->toolbarActions([
                 DeleteBulkAction::make(),
             ]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+
+        if (! Utils::isRolePanelPrefixEnabled()) {
+            return $query;
+        }
+
+        $prefix = Utils::getPanelRolePrefix();
+        if (filled($prefix)) {
+            return $query->where('name', 'like', $prefix . '%');
+        }
+
+        $separator = Utils::getRolePrefixSeparator();
+
+        return $query->where('name', 'not like', '%' . $separator . '%');
     }
 
     public static function getRelations(): array
