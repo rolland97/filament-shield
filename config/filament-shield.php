@@ -133,6 +133,16 @@ return [
         'path' => app_path('Policies'),
         'merge' => true,
         'generate' => true,
+        /*
+        |--------------------------------------------------------------------------
+        | Panel Path
+        |--------------------------------------------------------------------------
+        |
+        | When enabled, Shield will place generated policies under a
+        | panel-specific subdirectory (e.g. app/Policies/Admin).
+        |
+        */
+        'panel_path' => false,
         'methods' => [
             'viewAny', 'view', 'create', 'update', 'delete', 'restore',
             'forceDelete', 'forceDeleteAny', 'restoreAny', 'replicate', 'reorder',

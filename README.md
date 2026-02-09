@@ -256,6 +256,7 @@ Shield automatically generates policies for your Resources' Models.
     'path' => app_path('Policies'),
     'merge' => true,
     'generate' => true,
+    'panel_path' => false,
     'methods' => [
         'viewAny', 'view', 'create', 'update', 'delete', 'restore',
         'forceDelete', 'forceDeleteAny', 'restoreAny', 'replicate', 'reorder',
@@ -270,6 +271,12 @@ Shield automatically generates policies for your Resources' Models.
     ],
 ],
 ```
+
+### Panel-specific policy paths (optional)
+If your app uses multiple panels, you can enable `policies.panel_path` to store generated policies under a panel-specific subdirectory:
+
+- `app/Policies/Admin/*` for panel ID `admin`
+- `app/Policies/Team/*` for panel ID `team`
 
 ### Methods
 Each policy includes methods defined in the `policies.methods` config. You can customize this list to fit your application's needs. Since Filament Resources typically use a standard set of methods, the default configuration should suffice for most applications. If you have specific resources that require additional methods, you can easily add them to the list. 

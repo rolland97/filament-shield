@@ -127,9 +127,17 @@ class Utils
 
     public static function getPolicyPath(): string
     {
-        return Str::of(static::getConfig()->policies->path ?? app_path('Policies'))
+        $path = Str::of(static::getConfig()->policies->path ?? app_path('Policies'))
             ->replace('\\', DIRECTORY_SEPARATOR)
+            ->rtrim(DIRECTORY_SEPARATOR)
             ->toString();
+
+        $panelSegment = static::getPolicyPanelSegment();
+        if (filled($panelSegment)) {
+            $path .= DIRECTORY_SEPARATOR . $panelSegment;
+        }
+
+        return $path;
     }
 
     public static function getRolePolicyPath(): ?string
@@ -138,6 +146,25 @@ class Utils
         $path = static::getPolicyPath() . DIRECTORY_SEPARATOR . 'RolePolicy.php';
 
         return $filesystem->exists($path) ? Str::of(static::resolveNamespaceFromPath($path))->before('.php')->toString() : null;
+    }
+
+    public static function isPanelPolicyPathEnabled(): bool
+    {
+        return (bool) (static::getConfig()->policies->panel_path ?? false);
+    }
+
+    public static function getPolicyPanelSegment(): ?string
+    {
+        if (! static::isPanelPolicyPathEnabled()) {
+            return null;
+        }
+
+        $panelId = static::getCurrentPanelId();
+        if (blank($panelId)) {
+            return null;
+        }
+
+        return (string) Str::of($panelId)->studly();
     }
 
     public static function isRolePolicyRegistered(): bool
