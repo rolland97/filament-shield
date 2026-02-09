@@ -6,6 +6,8 @@ use BezhanSalleh\FilamentShield\Support\Utils;
 use Filament\Facades\Filament;
 use Filament\Panel;
 use Illuminate\Filesystem\Filesystem;
+use BezhanSalleh\FilamentShield\Commands\Concerns\CanGeneratePolicy;
+use BezhanSalleh\FilamentShield\Tests\Fixtures\Models\User;
 
 afterEach(function () {
     Filament::setCurrentPanel(null);
@@ -64,4 +66,33 @@ it('resolves role policy path within the panel policy directory', function () {
     $rolePolicy = Utils::getRolePolicyPath();
 
     expect($rolePolicy)->toBe('App\\Policies\\System\\RolePolicy');
+});
+
+it('mirrors model subfolders under the panel policy path', function () {
+    $panel = Panel::make()->id('system');
+    Filament::setCurrentPanel($panel);
+
+    config()->set('filament-shield.policies.panel_path', true);
+    config()->set('filament-shield.policies.force_path', false);
+
+    $generator = new class
+    {
+        use CanGeneratePolicy;
+
+        public function pathFor(string $modelFqcn): string
+        {
+            $entity = [
+                'resourceFqcn' => '',
+                'model' => class_basename($modelFqcn),
+                'modelFqcn' => $modelFqcn,
+            ];
+
+            return $this->generatePolicyPath($entity);
+        }
+    };
+
+    $path = $generator->pathFor(User::class);
+
+    expect($path)->toContain(DIRECTORY_SEPARATOR . 'Policies' . DIRECTORY_SEPARATOR . 'System' . DIRECTORY_SEPARATOR);
+    expect($path)->toEndWith(DIRECTORY_SEPARATOR . 'UserPolicy.php');
 });
