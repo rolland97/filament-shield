@@ -78,8 +78,11 @@ trait HasEntityTransformers
                 $permission = is_numeric($key) ? $label : $key;
                 $configLabel = is_numeric($key) ? null : $label;
 
+                $formattedPermission = $this->format($permissionCase, $permission);
+                $prefixedPermission = Utils::prefixPermissionWithPanel($formattedPermission);
+
                 return [
-                    $this->format($permissionCase, $permission) => $localized
+                    $prefixedPermission => $localized
                         ? $this->getCustomPermissionLabel($permission, $configLabel)
                         : Str::of($label)->headline()->toString(),
                 ];
