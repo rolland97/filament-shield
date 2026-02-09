@@ -28,6 +28,11 @@ class Utils
         return Filament::getCurrentOrDefaultPanel()?->getAuthGuard() ?? '';
     }
 
+    public static function getCurrentPanelId(): ?string
+    {
+        return Filament::getCurrentOrDefaultPanel()?->getId();
+    }
+
     public static function isResourcePublished(Panel $panel): bool
     {
         return str(
@@ -206,6 +211,39 @@ class Utils
         return static::getPermissionModel()::firstOrCreate(
             ['name' => $name, 'guard_name' => static::getFilamentAuthGuard()],
         )->name;
+    }
+
+    public static function isPanelPrefixEnabled(): bool
+    {
+        return (bool) (static::getConfig()->permissions->panel_prefix ?? false);
+    }
+
+    public static function getPanelPrefixSeparator(): string
+    {
+        return (string) (static::getConfig()->permissions->panel_prefix_separator
+            ?? static::getConfig()->permissions->separator
+            ?? ':');
+    }
+
+    public static function prefixPermissionWithPanel(string $permission): string
+    {
+        if (! static::isPanelPrefixEnabled()) {
+            return $permission;
+        }
+
+        $panelId = static::getCurrentPanelId();
+        if (blank($panelId)) {
+            return $permission;
+        }
+
+        $separator = static::getPanelPrefixSeparator();
+        $prefix = $panelId . $separator;
+
+        if (str_starts_with($permission, $prefix)) {
+            return $permission;
+        }
+
+        return $prefix . $permission;
     }
 
     public static function giveSuperAdminPermission(string | array | Collection $permissions): void

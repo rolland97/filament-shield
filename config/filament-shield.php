@@ -104,6 +104,18 @@ return [
         'separator' => ':',
         'case' => 'pascal',
         'generate' => true,
+        /*
+        |--------------------------------------------------------------------------
+        | Panel Prefix
+        |--------------------------------------------------------------------------
+        |
+        | When enabled, Shield will prefix permission keys with the current
+        | panel ID to avoid collisions across multiple panels that share
+        | the same auth guard.
+        |
+        */
+        'panel_prefix' => false,
+        'panel_prefix_separator' => ':',
     ],
 
     /*
