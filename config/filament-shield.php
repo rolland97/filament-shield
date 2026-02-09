@@ -143,6 +143,17 @@ return [
         |
         */
         'panel_path' => false,
+        /*
+        |--------------------------------------------------------------------------
+        | Force Base Path
+        |--------------------------------------------------------------------------
+        |
+        | When enabled, Shield will always write policies to the configured
+        | base path (and optional panel subdirectory), instead of mirroring
+        | the model's namespace.
+        |
+        */
+        'force_path' => false,
         'methods' => [
             'viewAny', 'view', 'create', 'update', 'delete', 'restore',
             'forceDelete', 'forceDeleteAny', 'restoreAny', 'replicate', 'reorder',

@@ -28,6 +28,14 @@ trait CanGeneratePolicy
     {
         $path = (new ReflectionClass($entity['modelFqcn']))->getFileName();
 
+        if (Utils::isPolicyPathForced()) {
+            return Str::of($entity['model'])
+                ->prepend(str(Utils::getPolicyPath())->append('\\'))
+                ->replace('\\', DIRECTORY_SEPARATOR)
+                ->append('Policy.php')
+                ->toString();
+        }
+
         if (Str::of($path)->contains(['vendor', 'src'])) {
             return Str::of($entity['model'])
                 ->prepend(str(Utils::getPolicyPath())->append('\\'))
