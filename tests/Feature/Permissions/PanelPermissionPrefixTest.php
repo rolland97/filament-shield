@@ -36,6 +36,18 @@ it('prefixes resource permission keys with panel id when enabled', function () {
     expect($key)->toStartWith('admin:');
 });
 
+it('falls back to permissions separator when panel separator is missing', function () {
+    config()->set('filament-shield.permissions.panel_prefix', true);
+    config()->set('filament-shield.permissions.panel_prefix_separator', null);
+    config()->set('filament-shield.permissions.separator', '_');
+
+    $shield = new FilamentShield;
+    $permissions = $shield->getDefaultPermissionKeys(RoleResource::class, ['view']);
+    $key = $permissions['view']['key'];
+
+    expect($key)->toStartWith('admin_');
+});
+
 it('prefixes custom permission keys with panel id when enabled', function () {
     config()->set('filament-shield.permissions.panel_prefix', true);
     config()->set('filament-shield.custom_permissions', [
