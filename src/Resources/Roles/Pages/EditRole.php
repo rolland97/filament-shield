@@ -47,7 +47,9 @@ class EditRole extends EditRecord
                 ->unique()
                 ->values();
 
-            $permissionModels = Utils::getPermissionModel()::whereIn('name', $permissionNames)->get();
+            $permissionModels = Utils::getPermissionModel()::whereIn('name', $permissionNames)
+                ->where('guard_name', $this->data['guard_name'])
+                ->get();
         }
 
         // @phpstan-ignore-next-line
