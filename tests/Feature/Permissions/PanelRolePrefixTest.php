@@ -42,6 +42,7 @@ it('keeps default panel roles while excluding other panel prefixes', function ()
     config()->set('filament-shield.roles.panel_prefix', true);
     config()->set('filament-shield.roles.panel_prefix_separator', ':');
 
+    // Only filter known panel prefixes, not every role containing the separator.
     $defaultPanel = Panel::make()->id('app')->default();
     $systemPanel = Panel::make()->id('system');
 

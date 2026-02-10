@@ -208,6 +208,10 @@ You can optionally prefix role names by panel ID to isolate roles across multipl
 ],
 ```
 
+Note: When panel role prefixes are enabled, the default panel filters out roles that match
+other panel prefixes (e.g. `system:`) but keeps custom roles that include the separator
+for other reasons (e.g. `team:lead`).
+
 * Now let's consider an example where we want to handle `Resource` entities that handle the same `Model` or `Models` with the same name but with different namespaces and directory structures. The Filament [Demo](https://github.com/filamentphp/demo) has two resources with the same name that handle two different models:
   - `App\Filament\Resources\Blog\Categories\CategoryResource` that handles `App\Models\Blog\Category`
   - `App\Filament\Resources\Shop\Categories\CategoryResource` that handles `App\Models\Shop\Category`
