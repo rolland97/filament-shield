@@ -38,6 +38,17 @@ it('keeps role names unprefixed for default panel', function () {
     expect(Utils::prefixRoleName('admin'))->toBe('admin');
 });
 
+it('falls back to permission panel separator when role separator is missing', function () {
+    config()->set('filament-shield.roles.panel_prefix', true);
+    config()->set('filament-shield.roles.panel_prefix_separator', null);
+    config()->set('filament-shield.permissions.panel_prefix_separator', '-');
+
+    $panel = Panel::make()->id('system');
+    Filament::setCurrentPanel($panel);
+
+    expect(Utils::prefixRoleName('admin'))->toBe('system-admin');
+});
+
 it('keeps default panel roles while excluding other panel prefixes', function () {
     config()->set('filament-shield.roles.panel_prefix', true);
     config()->set('filament-shield.roles.panel_prefix_separator', ':');

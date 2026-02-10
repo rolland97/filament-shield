@@ -7,7 +7,6 @@ namespace BezhanSalleh\FilamentShield\Resources\Roles\Pages;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use Filament\Resources\Pages\CreateRecord;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
 class CreateRole extends CreateRecord
@@ -18,32 +17,14 @@ class CreateRole extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $this->permissions = collect($data)
-            ->filter(fn (mixed $permission, string $key): bool => ! in_array($key, ['name', 'guard_name', 'select_all', Utils::getTenantModelForeignKey()]))
-            ->values()
-            ->flatten()
-            ->unique();
+        $this->permissions = Utils::extractRolePermissionsFromFormData($data);
 
-        if (Utils::isTenancyEnabled() && Arr::has($data, Utils::getTenantModelForeignKey()) && filled($data[Utils::getTenantModelForeignKey()])) {
-            $data['name'] = Utils::prefixRoleName((string) $data['name']);
-
-            return Arr::only($data, ['name', 'guard_name', Utils::getTenantModelForeignKey()]);
-        }
-
-        $data['name'] = Utils::prefixRoleName((string) $data['name']);
-
-        return Arr::only($data, ['name', 'guard_name']);
+        return Utils::normalizeRoleFormData($data);
     }
 
     protected function afterCreate(): void
     {
-        $permissionModels = collect();
-        $this->permissions->each(function (string $permission) use ($permissionModels): void {
-            $permissionModels->push(Utils::getPermissionModel()::firstOrCreate([
-                'name' => $permission,
-                'guard_name' => $this->data['guard_name'],
-            ]));
-        });
+        $permissionModels = Utils::buildPermissionModels($this->permissions, $this->data['guard_name']);
 
         $this->record->syncPermissions($permissionModels);
     }

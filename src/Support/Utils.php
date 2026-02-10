@@ -8,6 +8,7 @@ use BezhanSalleh\FilamentShield\Facades\FilamentShield;
 use Filament\Facades\Filament;
 use Filament\Panel;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -182,12 +183,12 @@ class Utils
 
     public static function isPanelPolicyPathEnabled(): bool
     {
-        return (bool) (static::getConfig()->policies->panel_path ?? false);
+        return static::getConfig()->policiesPanelPathEnabled();
     }
 
     public static function isPolicyPathForced(): bool
     {
-        return (bool) (static::getConfig()->policies->force_path ?? false);
+        return static::getConfig()->policiesForcePathEnabled();
     }
 
     public static function getPolicyPanelSegment(): ?string
@@ -253,6 +254,39 @@ class Utils
         return static::getConfig()->tenant_model ?? null;
     }
 
+    public static function extractRolePermissionsFromFormData(array $data): Collection
+    {
+        return collect($data)
+            ->filter(fn (mixed $permission, string $key): bool => ! in_array($key, ['name', 'guard_name', 'select_all', static::getTenantModelForeignKey()]))
+            ->values()
+            ->flatten()
+            ->unique();
+    }
+
+    public static function normalizeRoleFormData(array $data): array
+    {
+        $data['name'] = static::prefixRoleName((string) $data['name']);
+
+        if (static::isTenancyEnabled() && Arr::has($data, static::getTenantModelForeignKey()) && filled($data[static::getTenantModelForeignKey()])) {
+            return Arr::only($data, ['name', 'guard_name', static::getTenantModelForeignKey()]);
+        }
+
+        return Arr::only($data, ['name', 'guard_name']);
+    }
+
+    public static function buildPermissionModels(Collection $permissions, string $guardName): Collection
+    {
+        $permissionModels = collect();
+        $permissions->each(function (string $permission) use ($permissionModels, $guardName): void {
+            $permissionModels->push(static::getPermissionModel()::firstOrCreate([
+                'name' => $permission,
+                'guard_name' => $guardName,
+            ]));
+        });
+
+        return $permissionModels;
+    }
+
     public static function createRole(?string $name = null, int | string | null $tenantId = null): Role
     {
         $guardName = static::getFilamentAuthGuard();
@@ -285,19 +319,17 @@ class Utils
 
     public static function isPanelPrefixEnabled(): bool
     {
-        return (bool) (static::getConfig()->permissions->panel_prefix ?? false);
+        return static::getConfig()->permissionsPanelPrefixEnabled();
     }
 
     public static function isRolePanelPrefixEnabled(): bool
     {
-        return (bool) (static::getConfig()->roles->panel_prefix ?? false);
+        return static::getConfig()->rolesPanelPrefixEnabled();
     }
 
     public static function getRolePrefixSeparator(): string
     {
-        return (string) (static::getConfig()->roles->panel_prefix_separator
-            ?? static::getConfig()->permissions->panel_prefix_separator
-            ?? ':');
+        return static::getConfig()->rolesPanelPrefixSeparator();
     }
 
     public static function getPanelRolePrefix(): ?string
@@ -385,9 +417,7 @@ class Utils
 
     public static function getPanelPrefixSeparator(): string
     {
-        return (string) (static::getConfig()->permissions->panel_prefix_separator
-            ?? static::getConfig()->permissions->separator
-            ?? ':');
+        return static::getConfig()->permissionsPanelPrefixSeparator();
     }
 
     public static function prefixPermissionWithPanel(string $permission): string

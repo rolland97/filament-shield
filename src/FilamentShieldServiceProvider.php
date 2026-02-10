@@ -61,11 +61,11 @@ class FilamentShieldServiceProvider extends PackageServiceProvider
             });
         }
 
-        if (Utils::isRolePolicyRegistered() && ! config('filament-shield.policies.panel_aware_resolution', false)) {
+        if (Utils::isRolePolicyRegistered() && ! Utils::getConfig()->policiesPanelAwareResolutionEnabled()) {
             Gate::policy(Utils::getRoleModel(), Utils::getRolePolicyPath());
         }
 
-        if (config('filament-shield.policies.panel_aware_resolution', false)) {
+        if (Utils::getConfig()->policiesPanelAwareResolutionEnabled()) {
             Gate::guessPolicyNamesUsing(function (string $modelClass): string {
                 $appNamespace = app()->getNamespace();
 
