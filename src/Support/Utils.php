@@ -8,6 +8,7 @@ use BezhanSalleh\FilamentShield\Facades\FilamentShield;
 use Filament\Facades\Filament;
 use Filament\Panel;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -251,6 +252,39 @@ class Utils
     public static function getTenantModel(): ?string
     {
         return static::getConfig()->tenant_model ?? null;
+    }
+
+    public static function extractRolePermissionsFromFormData(array $data): Collection
+    {
+        return collect($data)
+            ->filter(fn (mixed $permission, string $key): bool => ! in_array($key, ['name', 'guard_name', 'select_all', static::getTenantModelForeignKey()]))
+            ->values()
+            ->flatten()
+            ->unique();
+    }
+
+    public static function normalizeRoleFormData(array $data): array
+    {
+        $data['name'] = static::prefixRoleName((string) $data['name']);
+
+        if (static::isTenancyEnabled() && Arr::has($data, static::getTenantModelForeignKey()) && filled($data[static::getTenantModelForeignKey()])) {
+            return Arr::only($data, ['name', 'guard_name', static::getTenantModelForeignKey()]);
+        }
+
+        return Arr::only($data, ['name', 'guard_name']);
+    }
+
+    public static function buildPermissionModels(Collection $permissions, string $guardName): Collection
+    {
+        $permissionModels = collect();
+        $permissions->each(function (string $permission) use ($permissionModels, $guardName): void {
+            $permissionModels->push(static::getPermissionModel()::firstOrCreate([
+                'name' => $permission,
+                'guard_name' => $guardName,
+            ]));
+        });
+
+        return $permissionModels;
     }
 
     public static function createRole(?string $name = null, int | string | null $tenantId = null): Role
