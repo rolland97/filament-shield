@@ -183,12 +183,12 @@ class Utils
 
     public static function isPanelPolicyPathEnabled(): bool
     {
-        return (bool) (static::getConfig()->policies->panel_path ?? false);
+        return static::getConfig()->policiesPanelPathEnabled();
     }
 
     public static function isPolicyPathForced(): bool
     {
-        return (bool) (static::getConfig()->policies->force_path ?? false);
+        return static::getConfig()->policiesForcePathEnabled();
     }
 
     public static function getPolicyPanelSegment(): ?string
@@ -319,19 +319,17 @@ class Utils
 
     public static function isPanelPrefixEnabled(): bool
     {
-        return (bool) (static::getConfig()->permissions->panel_prefix ?? false);
+        return static::getConfig()->permissionsPanelPrefixEnabled();
     }
 
     public static function isRolePanelPrefixEnabled(): bool
     {
-        return (bool) (static::getConfig()->roles->panel_prefix ?? false);
+        return static::getConfig()->rolesPanelPrefixEnabled();
     }
 
     public static function getRolePrefixSeparator(): string
     {
-        return (string) (static::getConfig()->roles->panel_prefix_separator
-            ?? static::getConfig()->permissions->panel_prefix_separator
-            ?? ':');
+        return static::getConfig()->rolesPanelPrefixSeparator();
     }
 
     public static function getPanelRolePrefix(): ?string
@@ -419,9 +417,7 @@ class Utils
 
     public static function getPanelPrefixSeparator(): string
     {
-        return (string) (static::getConfig()->permissions->panel_prefix_separator
-            ?? static::getConfig()->permissions->separator
-            ?? ':');
+        return static::getConfig()->permissionsPanelPrefixSeparator();
     }
 
     public static function prefixPermissionWithPanel(string $permission): string
