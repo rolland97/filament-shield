@@ -96,3 +96,32 @@ it('mirrors model subfolders under the panel policy path', function () {
     expect($path)->toContain(DIRECTORY_SEPARATOR . 'Policies' . DIRECTORY_SEPARATOR . 'System' . DIRECTORY_SEPARATOR);
     expect($path)->toEndWith(DIRECTORY_SEPARATOR . 'UserPolicy.php');
 });
+
+it('honors configured policy path outside app when force path is disabled', function () {
+    $customPath = base_path('custom-policies');
+
+    config()->set('filament-shield.policies.path', $customPath);
+    config()->set('filament-shield.policies.panel_path', false);
+    config()->set('filament-shield.policies.force_path', false);
+
+    $generator = new class
+    {
+        use CanGeneratePolicy;
+
+        public function pathFor(string $modelFqcn): string
+        {
+            $entity = [
+                'resourceFqcn' => '',
+                'model' => class_basename($modelFqcn),
+                'modelFqcn' => $modelFqcn,
+            ];
+
+            return $this->generatePolicyPath($entity);
+        }
+    };
+
+    $path = $generator->pathFor(User::class);
+
+    expect($path)->toStartWith($customPath);
+    expect($path)->toEndWith(DIRECTORY_SEPARATOR . 'UserPolicy.php');
+});

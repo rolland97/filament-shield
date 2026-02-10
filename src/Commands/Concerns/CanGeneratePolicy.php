@@ -44,7 +44,33 @@ trait CanGeneratePolicy
                 ->toString();
         }
 
-        $policyPathSegment = Utils::getPolicyPathRelativeToApp() ?? 'Policies';
+        $policyPathRelative = Utils::getPolicyPathRelativeToApp();
+        if ($policyPathRelative === null) {
+            $reflection = new ReflectionClass($entity['modelFqcn']);
+            $namespace = $reflection->getNamespaceName();
+            $model = $entity['model'];
+            $appNamespace = app()->getNamespace();
+
+            $relativeNamespace = null;
+            if (Str::startsWith($namespace, $appNamespace . 'Models\\')) {
+                $relativeNamespace = Str::of($namespace)->after($appNamespace . 'Models\\')->toString();
+            } elseif (Str::startsWith($namespace, $appNamespace)) {
+                $relativeNamespace = Str::of($namespace)->after($appNamespace)->toString();
+            }
+
+            $policyBasePath = Str::of(Utils::getPolicyPath())
+                ->replace('\\', DIRECTORY_SEPARATOR)
+                ->rtrim(DIRECTORY_SEPARATOR)
+                ->toString();
+
+            if (filled($relativeNamespace)) {
+                $policyBasePath .= DIRECTORY_SEPARATOR . str_replace('\\', DIRECTORY_SEPARATOR, $relativeNamespace);
+            }
+
+            return $policyBasePath . DIRECTORY_SEPARATOR . $model . 'Policy.php';
+        }
+
+        $policyPathSegment = $policyPathRelative;
         $policyPathSegment = str_replace(['\\', '/'], DIRECTORY_SEPARATOR, $policyPathSegment);
 
         /** @phpstan-ignore-next-line */

@@ -319,6 +319,30 @@ class Utils
         return $panelId . static::getRolePrefixSeparator();
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getOtherPanelRolePrefixes(): array
+    {
+        if (! static::isRolePanelPrefixEnabled()) {
+            return [];
+        }
+
+        $separator = static::getRolePrefixSeparator();
+        $panels = Filament::getPanels();
+
+        if (! is_array($panels) || $panels === []) {
+            return [];
+        }
+
+        return collect($panels)
+            ->filter(fn (Panel $panel): bool => ! $panel->isDefault() && filled($panel->getId()))
+            ->map(fn (Panel $panel): string => $panel->getId() . $separator)
+            ->unique()
+            ->values()
+            ->all();
+    }
+
     public static function prefixRoleName(string $name): string
     {
         $prefix = static::getPanelRolePrefix();

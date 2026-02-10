@@ -109,10 +109,16 @@ class RoleResource extends Resource
                         }
 
                         if (Utils::isRolePanelPrefixEnabled()) {
-                            $separator = Utils::getRolePrefixSeparator();
+                            $otherPrefixes = Utils::getOtherPanelRolePrefixes();
+                            if ($otherPrefixes !== []) {
+                                $query->where(function (Builder $subQuery) use ($otherPrefixes): void {
+                                    foreach ($otherPrefixes as $otherPrefix) {
+                                        $subQuery->where('name', 'not like', $otherPrefix . '%');
+                                    }
+                                });
+                            }
 
-                            return $query->where('name', 'not like', '%' . $separator . '%')
-                                ->where('name', 'like', '%' . $search . '%');
+                            return $query->where('name', 'like', '%' . $search . '%');
                         }
 
                         return $query->where('name', 'like', '%' . $search . '%');
@@ -171,9 +177,16 @@ class RoleResource extends Resource
             return $query->where('name', 'like', $prefix . '%');
         }
 
-        $separator = Utils::getRolePrefixSeparator();
+        $otherPrefixes = Utils::getOtherPanelRolePrefixes();
+        if ($otherPrefixes === []) {
+            return $query;
+        }
 
-        return $query->where('name', 'not like', '%' . $separator . '%');
+        return $query->where(function (Builder $subQuery) use ($otherPrefixes): void {
+            foreach ($otherPrefixes as $otherPrefix) {
+                $subQuery->where('name', 'not like', $otherPrefix . '%');
+            }
+        });
     }
 
     public static function getRelations(): array
