@@ -169,6 +169,16 @@ return [
         |
         */
         'force_path' => false,
+        /*
+        |--------------------------------------------------------------------------
+        | Panel-Aware Policy Resolution
+        |--------------------------------------------------------------------------
+        |
+        | When enabled, Shield registers a panel-aware policy guesser so
+        | policies resolve to the current panel's directory at runtime.
+        |
+        */
+        'panel_aware_resolution' => false,
         'methods' => [
             'viewAny', 'view', 'create', 'update', 'delete', 'restore',
             'forceDelete', 'forceDeleteAny', 'restoreAny', 'replicate', 'reorder',

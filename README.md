@@ -273,6 +273,7 @@ Shield automatically generates policies for your Resources' Models.
     'generate' => true,
     'panel_path' => false,
     'force_path' => false,
+    'panel_aware_resolution' => false,
     'methods' => [
         'viewAny', 'view', 'create', 'update', 'delete', 'restore',
         'forceDelete', 'forceDeleteAny', 'restoreAny', 'replicate', 'reorder',
@@ -293,6 +294,11 @@ If your app uses multiple panels, you can enable `policies.panel_path` to store 
 
 - Default panel: `app/Policies/*`
 - Non-default panel (ID `system`): `app/Policies/System/*`
+
+### Panel-aware policy resolution (optional)
+If you enable `policies.panel_path`, you can also enable `policies.panel_aware_resolution` so the Gate resolves policies to the current panel at runtime. This prevents the default panel policy from being used in non-default panels.
+
+If you already have a custom `Gate::guessPolicyNamesUsing()` in your app, keep it and add the panel-aware logic there instead.
 
 ### Force policies to a single base path (optional)
 If you want policies to always be generated under the configured base path (and optional panel subdirectory), enable `policies.force_path`. This disables the default behavior that mirrors the model namespace.
