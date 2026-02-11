@@ -8,8 +8,10 @@ use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Spatie\Permission\Contracts\Role as RoleContract;
 
 class EditRole extends EditRecord
 {
@@ -35,9 +37,10 @@ class EditRole extends EditRecord
     {
         $permissionModels = Utils::buildPermissionModels($this->permissions, $this->data['guard_name']);
 
+        $record = $this->getRoleRecord();
         $panelPrefix = Utils::getPanelPermissionPrefix();
         if (filled($panelPrefix)) {
-            $otherPanelPermissions = $this->record->permissions
+            $otherPanelPermissions = $record->permissions()
                 ->pluck('name')
                 ->filter(fn (string $name): bool => ! Str::startsWith($name, $panelPrefix))
                 ->values();
@@ -52,7 +55,17 @@ class EditRole extends EditRecord
                 ->get();
         }
 
-        // @phpstan-ignore-next-line
-        $this->record->syncPermissions($permissionModels);
+        $record->syncPermissions($permissionModels);
+    }
+
+    /**
+     * @return Model&RoleContract
+     */
+    protected function getRoleRecord(): Model
+    {
+        /** @var Model&RoleContract $record */
+        $record = $this->record;
+
+        return $record;
     }
 }
