@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
+use BezhanSalleh\FilamentShield\Commands\Concerns\CanGeneratePolicy;
 use BezhanSalleh\FilamentShield\Support\Utils;
+use BezhanSalleh\FilamentShield\Tests\Fixtures\Models\User;
 use Filament\Facades\Filament;
 use Filament\Panel;
 use Illuminate\Filesystem\Filesystem;
-use BezhanSalleh\FilamentShield\Commands\Concerns\CanGeneratePolicy;
-use BezhanSalleh\FilamentShield\Tests\Fixtures\Models\User;
 
 afterEach(function () {
     Filament::setCurrentPanel(null);
