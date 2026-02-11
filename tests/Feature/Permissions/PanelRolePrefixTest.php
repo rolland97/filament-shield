@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use Filament\Facades\Filament;
 use Filament\Panel;
 use Filament\PanelRegistry;
-use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Spatie\Permission\Models\Role;
 
 afterEach(function () {
